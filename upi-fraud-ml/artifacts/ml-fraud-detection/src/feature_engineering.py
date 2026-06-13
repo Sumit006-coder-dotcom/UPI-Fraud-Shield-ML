@@ -142,16 +142,35 @@ def engineer_features(
 def get_X_y(df: pd.DataFrame, label_encoders: dict = None, fit: bool = True):
     df, label_encoders = engineer_features(df, label_encoders=label_encoders, fit=fit)
     available = [c for c in FEATURE_COLS if c in df.columns]
-    for col in available:
-      (col, df[col].dtype)
-    label_encoders = {}
+    if label_encoders is None:
+        label_encoders = {}
 
+    # Encode any remaining object columns among the selected features
     for col in available:
-     if df[col].dtype == 'object':
-        le = LabelEncoder()
-        df[col] = le.fit_transform(df[col].astype(str))
-        label_encoders[col] = le
-    X = df[available].astype(float)
+        if df[col].dtype == object or df[col].dtype == "object":
+            if fit or col not in label_encoders:
+                le = LabelEncoder()
+                df[col] = le.fit_transform(df[col].astype(str))
+                label_encoders[col] = le
+            else:
+                le = label_encoders.get(col)
+                if le is not None:
+                    known = set(le.classes_)
+                    df[col] = df[col].apply(lambda x: x if x in known else le.classes_[0])
+                    df[col] = le.transform(df[col].astype(str))
+                else:
+                    df[col] = 0
+
+    # Ensure numeric types
+    for col in available:
+        try:
+            df[col] = df[col].astype(float)
+        except Exception as e:
+            print(f"Problem column: {col}")
+            print(df[col].head())
+            raise e
+
+    X = df[available]
     y = df["is_fraud"].astype(int)
     return X, y, label_encoders, available
 
