@@ -147,7 +147,7 @@ def get_X_y(df: pd.DataFrame, label_encoders: dict = None, fit: bool = True):
 
     # Encode any remaining object columns among the selected features
     for col in available:
-        if df[col].dtype == object or df[col].dtype == "object":
+        if pd.api.types.is_string_dtype(df[col]) or df[col].dtype == object:
             if fit or col not in label_encoders:
                 le = LabelEncoder()
                 df[col] = le.fit_transform(df[col].astype(str))
@@ -164,7 +164,8 @@ def get_X_y(df: pd.DataFrame, label_encoders: dict = None, fit: bool = True):
     # Ensure numeric types
     for col in available:
         try:
-            df[col] = df[col].astype(float)
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+            df[col] = df[col].fillna(0.0)
         except Exception as e:
             print(f"Problem column: {col}")
             print(df[col].head())
