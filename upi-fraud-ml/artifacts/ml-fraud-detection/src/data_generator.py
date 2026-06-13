@@ -26,7 +26,7 @@ SOCIAL_OPTIONS         = ["verified", "unverified", "none"]
 from pathlib import Path
 import os
 
-BASE_DIR = Path(__file__).resolve().parents[2]
+BASE_DIR = Path(__file__).resolve().parents[3]
 
 def _find_csv(csv_path=None):
     candidates = [
@@ -36,12 +36,11 @@ def _find_csv(csv_path=None):
     ]
 
     for p in candidates:
-        if p and os.path.exists(str(p)):
+        if p and Path(p).exists():
             return str(p)
 
     raise FileNotFoundError(
-        f"fraud_dataset.csv not found.\n"
-        f"Looked in: {candidates}"
+        f"fraud_dataset.csv not found.\nLooked in: {candidates}"
     )
 
 def load_dataset(csv_path: str = None) -> pd.DataFrame:
