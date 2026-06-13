@@ -23,21 +23,26 @@ BUSINESS_MATCH_OPTIONS = ["match", "mismatch", "none"]
 SOCIAL_OPTIONS         = ["verified", "unverified", "none"]
 
 
-def _find_csv(csv_path: str = None) -> str:
+from pathlib import Path
+import os
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+def _find_csv(csv_path=None):
     candidates = [
         csv_path,
-        _DEFAULT_CSV,
-        os.path.join("dataset", "fraud_dataset.csv"),
-        "fraud_dataset.csv",
+        BASE_DIR / "dataset" / "fraud_dataset.csv",
+        BASE_DIR / "fraud_dataset.csv"
     ]
-    for p in candidates:
-        if p and os.path.exists(p):
-            return p
-    raise FileNotFoundError(
-        "fraud_dataset.csv not found. "
-        "Place it at dataset/fraud_dataset.csv relative to the app directory."
-    )
 
+    for p in candidates:
+        if p and os.path.exists(str(p)):
+            return str(p)
+
+    raise FileNotFoundError(
+        f"fraud_dataset.csv not found.\n"
+        f"Looked in: {candidates}"
+    )
 
 def load_dataset(csv_path: str = None) -> pd.DataFrame:
     return load_and_clean_dataset(_find_csv(csv_path))
