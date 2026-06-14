@@ -311,7 +311,10 @@ def show_auth():
                     st.error("Passwords do not match.")
                 else:
                     ok, msg = register(r_uname, r_email, r_pwd)
-                    st.success(msg) if ok else st.error(msg)
+                    if ok:
+                     st.success(msg)
+                    else:
+                        st.error(msg)
             st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown("<div style='text-align:center;color:#334155;font-size:0.77rem;margin-top:1.5rem;'>Passwords hashed with SHA-256 · Predictions stored per user</div>", unsafe_allow_html=True)
